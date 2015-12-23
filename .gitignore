@@ -1,0 +1,9 @@
+*.class
+*.jar
+*~
+.DS_Store
+.#*
+pom.xml
+.lein-repl-history
+.nrepl-port
+target
