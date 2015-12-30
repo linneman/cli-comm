@@ -1,3 +1,9 @@
+/**
+ *   Clojure Adapter for the Java Communications API
+ *
+ *   by Otto Linnemann
+ *   (C) 2015, Eclipse Public License
+ */
 package clj_comm;
 
 import java.util.Vector;
@@ -6,6 +12,13 @@ import java.io.*;
 import gnu.io.*;
 
 
+/**
+ *   Implementation of buffering for serial port input data
+ *
+ *   Object for caching serial port input data. The notification event is generated only when
+ *   the internal buffer is full or one of the specified trigger character sequences has been
+ *   detected.
+ */
 public class BufferedSerialPortReader implements SerialPortEventListener
 {
   private InputStream is;
@@ -15,7 +28,6 @@ public class BufferedSerialPortReader implements SerialPortEventListener
   private Vector<byte[]> triggers;
   private Vector<BufferedSerialPortEventListener> listeners;
 
-  // constructor argument wrong when same name?????
   public BufferedSerialPortReader( InputStream is, int maxBufSize, Vector<byte[]> triggers ) {
     this.is = is;
     this.os = new ByteArrayOutputStream();
@@ -57,6 +69,12 @@ public class BufferedSerialPortReader implements SerialPortEventListener
     return false;
   }
 
+
+  /**
+   * invoked when the sequence of trigger chaacters has been recieved.
+   * all buffered characters which have been red from serial line
+   * are returned as event and the buffer chache is emptied afterwards.
+   */
   public void serialEvent(SerialPortEvent ev)  {
     try {
       boolean trigger = false;
@@ -65,9 +83,7 @@ public class BufferedSerialPortReader implements SerialPortEventListener
         // read from is and append result to buffer
         byte[] chunk = new byte[is.available()];
         int bytesRead = is.read( chunk );
-        /*
-        System.out.println("got "+new Integer(bytesRead).toString()+" bytes: "+new String(chunk)
-        +", first byte: " + new Integer(chunk[0]).toString()); */
+
         os.write( chunk, 0, bytesRead );
         bytesInBuffer += bytesRead;
 
@@ -87,7 +103,6 @@ public class BufferedSerialPortReader implements SerialPortEventListener
       }
 
       if( trigger ) {
-        System.out.println("*** triggered, got: "+os.toString());
         // if condition found then trigger
         for( Iterator<BufferedSerialPortEventListener> it = listeners.iterator(); it.hasNext(); ) {
           BufferedSerialPortEventListener l = it.next();
@@ -99,6 +114,7 @@ public class BufferedSerialPortReader implements SerialPortEventListener
     } catch( IOException e) { System.err.println( "IOExcepton occured!" ); }
   }
 
+  /** just a smoke test */
   public static void main( String[] args ) throws Exception
     {
       if(args.length < 1 ) {
